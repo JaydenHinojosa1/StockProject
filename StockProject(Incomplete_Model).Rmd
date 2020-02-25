@@ -1,0 +1,119 @@
+---
+title: "StockProject"
+authors:Juan & Jayden
+output: html_notebook
+---
+
+
+```{r}
+#loading libraries
+library(jsonlite)
+library(dplyr)
+
+#setting up api keys
+av_api_key_1 = "2VPJDGAGHGAOTXE1" #juan's key
+av_api_key_2 = "3OXO48KCOESIZXEB" #jayden's key
+
+#setting up companies
+av_api_key1_companies = c("AMD","FB","INTC","MSFT","NVDA")
+av_api_key2_companies = c("DIS","SBUX","FIT","BAC","XOM")
+
+#global quote function
+getGlobalQuote <- function(companies, api_key){
+  globalQuotePrice <- data.frame(symbol = character(),
+                            open = integer(),
+                            high = integer(),
+                            low = integer(),
+                            price = integer(),
+                            volume = integer(),
+                            latestday = as.Date(character()),
+                            previousclose = integer(),
+                            change = integer(),
+                            changepercent = character())
+  for(i in 1:5){
+    url <- str_c("https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=",
+                 companies[i],"&apikey=", api_key)
+    
+    globalQuote <- as.data.frame(fromJSON(url))
+    globalQuote <- rbind(globalQuote, globalQuotePrice)
+  }
+  return(globalQuote)
+}
+
+#setting profiles
+profile_1 <- "19cb38b1" #juan's profile
+profile_2 <- "2551c124" #jayden's profile
+
+#####################################
+#buy function
+buyShares <- function(buy_companies,api_key,profile){
+  url <- str_c("https://projectrex.net/stocks/?key=",
+               profile,"&av_key=",
+               api_key,"&request=buy&symbol=",
+               buy_companies,"&quantity=1")
+  result <- fromJSON(url)
+  print(result)
+}
+
+#sell function
+sellShares <- function(sell_companies,api_key,profile){
+  url <- str_c("https://projectrex.net/stocks/?key=",
+               profile,"&av_key=",
+               api_key,"&request=sell&symbol=",
+               sell_companies,"&quantity=1")
+  result <- fromJSON(url)
+  print(result)
+}
+
+######################################
+#date and time
+days <- c("Mon","Tue","Wed","Thu","Fri")
+timerange <- c("10:00:00","16:00:00")
+dateTimeDay <- format(Sys.time(), "%a")
+dateTime <- format(Sys.time(), "%X")
+
+#checking conditions
+condition1 <- dateTimeDay %in% days
+condition2 <- (dateTime >= timerange[1]) & (dateTime < timerange[2])
+
+#This puts you in timeout after buying 2 stocks for every x amount of time in seconds
+timeout <- function(x){
+  p1 <- proc.time()
+  Sys.sleep(x)
+  proc.time()-p1
+  print("Time expired, you may buy or sell again!")
+}
+
+#checking conditions and creating loop with 60 seconds
+operations <- function(companies, api_key, profile){
+  if(condition1 & condition2){
+    print("Welcome to the Market!")
+    
+    #setting up for loop with 250 operations
+    print("Initiating transactions...")
+    for(i in 1:125){
+      
+      #checking global quotes
+      globalQuotePrice <- getGlobalQuote(companies, api_key)
+      #print(globalQuotePrice)
+      
+      #buying cheapest profile 1 with api key 1
+      buyShares(companies[2], api_key, profile)
+      #selling highest profile 1 with api key 1
+      sellShares(companies[4], api_key, profile)
+      
+    timeout(60)
+    }
+    print("Transactions finished!")
+  }else{
+    print("Error, market closed")
+  }
+}
+
+#calling operations function
+operations(av_api_key1_companies, av_api_key_1, profile_1)
+
+
+```
+
+
