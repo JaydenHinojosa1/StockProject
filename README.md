@@ -33,3 +33,4 @@ About the Files:
 -Automation_v4 is a loop which would buy and sell stocks to meet the requirement of reaching 250 transactions
 -Manuel_v2 is responsible for investing all of the budget into a list of companies 
 	-This will also make sure that before we run automation_v4 we sell a stock to ensure we have a budget which will not cause the loop to overdraw.
+-StockProject(Incomplete_Model).Rmd is our incomplete model which would be fully automated and been able to make calls to Alpha Vantage
